@@ -7,7 +7,7 @@ import base64
 
 user = admin
 password = admin
-jenkinsUrl = http://192.168.0.35:8080/
+jenkinsUrl = 'http://192.168.0.35:8080/'
 
 
 def urlopen(url, data=None):
