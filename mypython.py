@@ -1,48 +1,42 @@
-#!/usr/bin/python
-
 import json
-import sys
-import urllib2
-import base64
+import requests
+import time
 
-user = admin
-password = admin
-jenkinsUrl = 'http://192.168.0.35:8080/'
+job_name = "testjob"  # Give your job name here
 
 
-def urlopen(url, data=None):
-    '''Open a URL using the urllib2 opener.'''
-    request = urllib2.Request(url, data)
-    base64string = base64.encodestring('%s:%s' % (user, password)).replace('\n', '')
-    request.add_header("Authorization", "Basic %s" % base64string)
-    response = urllib2.urlopen(request)
-    return response
+def jenkins_job_status(job_name):
+    try:
+        url = "http://192.168.0.35:8080/job/%s/lastBuild/api/json" % job_name  # Replace 'your_jenkins_endpoint' with your Jenkins URL
+        while True:
+            data = requests.get(url).json()
+            if data['building']:
+                time.sleep(60)
+            else:
+                if data['result'] == "SUCCESS":
+
+                    print
+                    "Job is success"
+                    return True
+                else:
+                    print
+                    "Job status failed"
+                    return False
 
 
+    except Exception as e:
+        print
+        str(e)
+        return False
 
-if len( sys.argv ) > 1 :
-    jobName = sys.argv[1]
-else :
-    sys.exit(1)
 
-try:
-    jenkinsStream   = urlopen(jenkinsUrl + jobName + "/lastBuild/api/json")
-except urllib2.HTTPError, e:
-    print "URL Error: " + str(e.code)
-    print "      (job name [" + jobName + "] probably wrong)"
-    sys.exit(2)
+if __name__ == "__main__":
 
-try:
-    buildStatusJson = json.load( jenkinsStream )
-except:
-    print "Failed to parse json"
-    sys.exit(3)
+    if jenkins_job_status(job_name):
 
-if buildStatusJson.has_key( "result" ):
-    print "[" + jobName + " #" + str(buildStatusJson["number"]) + "]: " + buildStatusJson["result"]
-    if buildStatusJson["result"] != "SUCCESS" :
-		exit(4)
-else:
-	sys.exit(5)
+        print
+        "Put your autmation here for 'job is success' condition"
 
-sys.exit(0)
+    else:
+        print
+        "Put your autmation here for 'job is failed' condition"
